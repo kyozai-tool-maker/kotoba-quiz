@@ -470,7 +470,16 @@
     const DEFAULT_SETTINGS = { listId: "preset:mix", count: 10, showText: true, speechLevel: 1.0, myLists: [] };
     const $ = id => document.getElementById(id);
     const clone = value => JSON.parse(JSON.stringify(value));
-    const pathFor = filename => "images/" + filename;
+    // GitHub PagesではiPhoneから登録した日本語ファイル名がNFD形式になるため、
+    // 公開先がgithub.ioのときだけ画像の参照先をNFDに揃える。
+    // それ以外の環境（ローカル／他ホスティング）は従来どおりにする。
+    const isGitHubPages = location.hostname.endsWith(".github.io");
+    const pathFor = filename => "images/" + (isGitHubPages ? filename.normalize("NFD") : filename);
+    if (isGitHubPages) {
+      document.querySelectorAll(".home-illustrations img").forEach(img => {
+        img.src = img.getAttribute("src").normalize("NFD");
+      });
+    }
     let storageAvailable = true;
     let settings = loadSettings();
     let queue = [];
